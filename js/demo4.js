@@ -81,6 +81,8 @@
             this.DOM.svg.setAttribute('height','100%');
             this.DOM.svg.setAttribute('viewbox',`0 0 ${this.rect.width} ${this.rect.height}`);
             
+            var bgimage = document.getElementById("codrops-background-image").value;
+
             const imgFillSize = this.calculateImgFillSizes();
             this.DOM.svg.innerHTML = `
                 <defs>
@@ -88,7 +90,7 @@
                         <path fill="${this.settings.frameFill}" d="${this.paths.initial}"/>
                     </clipPath>
                 </defs>
-                <image xlink:href="img/map.png" clip-path="url(#shape__clip)" x="0" y="0" width="${imgFillSize.width}px" height="${imgFillSize.height}px"/>
+                <image xlink:href="`+bgimage+`" clip-path="url(#shape__clip)" x="0" y="0" width="${imgFillSize.width}px" height="${imgFillSize.height}px"/>
             `;
             this.DOM.el.insertBefore(this.DOM.svg, this.DOM.titles);
             this.DOM.shape = this.DOM.svg.querySelector('path');

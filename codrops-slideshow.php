@@ -40,7 +40,6 @@ class CodropsSlideshow {
 		// 	add_action( 'template_redirect', array($this, 'reviews_endpoint_data') );
 		// }
 
-		add_shortcode( "codrops_slide" , array($this, 'codrops_slide_shortcode') );
 		add_shortcode( "codrops_slideshow" , array($this, 'codrops_slideshow_shortcode') );
 
 		// register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -186,59 +185,57 @@ class CodropsSlideshow {
 		       'class' => '',
 		       'id' => '',
 		       'height' => '100vh',
-		       'type' => 'demo-1'
+		       'view' => 'demo-1',
+		       'type' => 'normal',
+		       'background_image' => ''
 		    ), $atts) );
 
-		$template = "%s";
+		$slides = json_decode(trim(str_replace("[", "\"", $content)));
 
-		// $slides = array(
-		// 	array(
-		// 		'image' => "http://localhost:8888/media/25.jpg", 
-		// 		'title' => "Slide 1", 
-		// 		'description' => "Lorem Ipsum", 
-		// 		'link_text' => "See More", 
-		// 		'link_url' => "#", 
-		// 	),
-		// 	array(
-		// 		'image' => "http://localhost:8888/media/26.jpg", 
-		// 		'title' => "Slide 2", 
-		// 		'description' => "Lorem Ipsum", 
-		// 		'link_text' => "See More", 
-		// 		'link_url' => "#", 
-		// 	),
-		// 	array(
-		// 		'image' => "http://localhost:8888/media/27.jpg", 
-		// 		'title' => "Slide 3", 
-		// 		'description' => "Lorem Ipsum", 
-		// 		'link_text' => "See More", 
-		// 		'link_url' => "#", 
-		// 	),
-		// );
+		// echo $count;
+		// var_dump(json_decode(trim($json)));
+		// die;
 
 		//enqueue registered scripts
 		$nav_template = '<nav class="slidenav"><button class="slidenav__item slidenav__item--prev">Previous</button><span>/</span><button class="slidenav__item slidenav__item--next">Next</button></nav>';
-		$slides_wrapper = sprintf('<div id="slideshow-container" class="%s loading"><div class="slideshow" style="height:%s;"><div class="slides">%s</div>%s</div></div>', $type, $height, "%s", $nav_template);
+		$slides_wrapper = sprintf('<div id="slideshow-container" class="%s loading"><div class="slideshow" style="height:%s;">%s%s</div></div>', $view, $height, "%s", $nav_template);
 
-		wp_enqueue_script( $type );
+		wp_enqueue_script( $view );
 
 		//scripts
-		$slides_wrapper .= "";
-		$output = do_shortcode($content);
+		$output = "";
 
-		// for ($i=0; $i < count($slides); $i++) { 
-		// 	$slide = $slides[$i];
-		// 	$output .= $this->_create_slide($slide["image"],
-		// 									$slide["title"],
-		// 									$slide["description"],
-		// 									$slide["link_url"],
-		// 									$slide["link_text"],
-		// 									($i == 0));
-		// }
+		switch ($type) {
+			case 'split':
+				$slides_wrapper = sprintf($slides_wrapper, "%s");
+				$titles = "";
+				$images = "";
+				foreach ($slides as $slide) {
+					$arr = $this->_create_split_slide($slide);
+					$images .= $arr[0];
+					$titles .= $arr[1];
+				}
+				$output = sprintf('<div class="slides slides--images">%s</div><div class="slides slides--titles">%s</div>', $images, $titles);
+				break;
+			
+			default:
+				$slides_wrapper = sprintf($slides_wrapper, '<div class="slides">%s</div>');
+				foreach ($slides as $slide) {
+					$output .= $this->_create_normal_slide($slide);
+				}
+				break;
+		}
+
+		if (!empty($background_image))
+		{
+			$output .= sprintf('<input type="hidden" id="codrops-background-image" value="%s" />', $background_image);
+		}
+		
 
 		return sprintf($slides_wrapper, $output);
 	}
 
-	function codrops_slide_shortcode($atts, $content=null)
+	private function _create_split_slide($slide)
 	{
 		extract(shortcode_atts(array(
 		       'image' => '',
@@ -248,25 +245,49 @@ class CodropsSlideshow {
 		       'link_text' => '',
 		       'isfirst' => 'false',
 		       'type' => 'normal',
-		    ), $atts) );
+		    ), $slide) );
 
-		$output = "";
+		$container_template = '<div class="slide%s">%s</div>';
+		$image_template = '<div class="slide__img" style="background-image: url(\'%s\')"></div>';
+		$title_template = '<h2 class="slide__title">%s</h2>';
+		$description_template = '<p class="slide__desc">%s</p>';
+		$link_template = '<a class="slide__link" href="%s">%s</a>';
 
-		switch ($type) {
-			case 'split':
-				$this->_create_split_slide($image, $title, $description, $link_url, $link_text, ($isfirst=="true"));
-				break;
-			
-			default:
-				$output = $this->_create_normal_slide($image, $title, $description, $link_url, $link_text, ($isfirst=="true"));
-				break;
+		$slide_content = $title_template;
+
+		if (!empty($description))
+		{
+			$slide_content .= $description_template;
 		}
 
-		return $output;
+		if (!empty($link_url))
+		{
+			$slide_content .= $link_template;
+		}
+
+		$slide_class = ($isfirst=="true")?" slide--current":"";
+		
+		$image_slide_template = sprintf($container_template,$slide_class, $image_template);
+		$title_slide_template = sprintf($container_template,$slide_class, $slide_content);
+
+		$image_slide = sprintf($image_slide_template, $image);
+		$title_slide = sprintf($title_slide_template, $title, $description, $link_url, $link_text);
+
+		return array($image_slide, $title_slide);
 	}
 
-	private function _create_split_slide($image, $title, $description="", $link_url="", $link_text="", $isfirst=false)
+	private function _create_normal_slide($slide)
 	{
+		extract(shortcode_atts(array(
+		       'image' => '',
+		       'title' => '',
+		       'description' => '100vh',
+		       'link_url' => '',
+		       'link_text' => '',
+		       'isfirst' => 'false',
+		       'type' => 'normal',
+		    ), $slide) );
+
 		$container_template = '<div class="slide%s">%s</div>';
 		$image_template = '<div class="slide__img" style="background-image: url(\'%1$s\')"></div>';
 		$title_template = '<h2 class="slide__title">%2$s</h2>';
@@ -285,33 +306,7 @@ class CodropsSlideshow {
 			$slide_content .= $link_template;
 		}
 
-		$slide_class = ($isfirst)?" slide--current":"";
-		$slide_template = sprintf($container_template,$slide_class, $slide_content);
-
-		return sprintf($slide_template,	$image, $title, $description, $link_url, $link_text);
-	}
-
-	private function _create_normal_slide($image, $title, $description="", $link_url="", $link_text="", $isfirst=false)
-	{
-		$container_template = '<div class="slide%s">%s</div>';
-		$image_template = '<div class="slide__img" style="background-image: url(\'%1$s\')"></div>';
-		$title_template = '<h2 class="slide__title">%2$s</h2>';
-		$description_template = '<p class="slide__desc">%3$s</p>';
-		$link_template = '<a class="slide__link" href="%4$s">%5$s</a>';
-
-		$slide_content = $image_template . $title_template;
-
-		if (!empty($description))
-		{
-			$slide_content .= $description_template;
-		}
-
-		if (!empty($link_url))
-		{
-			$slide_content .= $link_template;
-		}
-
-		$slide_class = ($isfirst)?" slide--current":"";
+		$slide_class = ($isfirst=="true")?" slide--current":"";
 		$slide_template = sprintf($container_template,$slide_class, $slide_content);
 
 		return sprintf($slide_template,	$image, $title, $description, $link_url, $link_text);
