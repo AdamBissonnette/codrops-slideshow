@@ -51,6 +51,7 @@ html {
     --color-slink-hover-bg: #37dbff;
     --color-nav: #f1f1f1;
     --color-nav-hover: #37dbff;
+    --mobile-vh: 40vh;
 }
 
 .demo-3 {
@@ -67,6 +68,7 @@ html {
     --color-slink-hover-bg: #ED4264;
     --color-nav: #ED4264;
     --color-nav-hover: #000;
+    --mobile-vh: 40vh;
 }
 
 .demo-4 {
@@ -78,6 +80,7 @@ html {
 	--fontsize-stitle: 8vw;
 	--color-nav: #74c3d0;
 	--color-nav-hover: #000;
+    --mobile-vh: 40vh;
 }
 
 .demo-5 {
@@ -94,6 +97,7 @@ html {
     --color-slink-hover-bg: #da281b;
     --color-nav: #f1f1f1;
     --color-nav-hover: #da281b;
+    --mobile-vh: 40vh;
 }
 
 .demo-6 {
@@ -105,6 +109,7 @@ html {
     --fontsize-stitle: 12vw;
     --color-nav: #fff;
     --color-nav-hover: #415bf8;
+    --mobile-vh: 40vh;
 }
 
 /* Fade effect */
@@ -349,12 +354,10 @@ a.demo--current {
 
 .slidenav {
 	position: absolute;
-	width: 300px;
-	margin-left: -150px;
-	left: 50%;
-	bottom: 0;
-	text-align: center;
-	padding: 2em;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	transition: 0.5s opacity;
 }
 
 .slidenav__item {
@@ -370,6 +373,24 @@ a.demo--current {
 
 .slidenav__item:hover {
 	color: var(--color-nav-hover);
+}
+
+#slideshow-container:hover .slidenav {
+	opacity: 1;
+}
+
+.slidenav__item--prev, .slidenav__item--next {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 30%;
+	/*background: rgba(0,0,0,0.1);*/
+	cursor: pointer;
+}
+.slidenav__item--next {
+	right: 0;
+	left: unset;
 }
 
 .shape {
@@ -409,6 +430,7 @@ a.demo--current {
 	color: var(--color-slink);
 	background: var(--color-slink-bg);
 	transition: color 0.3s, background 0.3s;
+	z-index: 2;
 }
 
 .slide__link:hover {

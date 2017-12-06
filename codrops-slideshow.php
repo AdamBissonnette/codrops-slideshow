@@ -187,7 +187,9 @@ class CodropsSlideshow {
 		       'height' => '100vh',
 		       'view' => 'demo-1',
 		       'type' => 'normal',
-		       'background_image' => ''
+		       'background_image' => '',
+		       'autoplay' => 1,
+		       'speed' => 2000
 		    ), $atts) );
 
 		$slides = json_decode(trim(str_replace("[", "\"", $content)));
@@ -197,7 +199,7 @@ class CodropsSlideshow {
 		// die;
 
 		//enqueue registered scripts
-		$nav_template = '<nav class="slidenav"><button class="slidenav__item slidenav__item--prev">Previous</button><span>/</span><button class="slidenav__item slidenav__item--next">Next</button></nav>';
+		$nav_template = '<nav class="slidenav"><div class="slidenav__item slidenav__item--prev"></div><div class="slidenav__item slidenav__item--next"></div></nav>';
 		$slides_wrapper = sprintf('<div id="slideshow-container" class="%s loading"><div class="slideshow" style="height:%s;">%s%s</div></div>', $view, $height, "%s", $nav_template);
 
 		wp_enqueue_script( $view );
@@ -229,6 +231,16 @@ class CodropsSlideshow {
 		if (!empty($background_image))
 		{
 			$output .= sprintf('<input type="hidden" id="codrops-background-image" value="%s" />', $background_image);
+		}
+
+		if (!empty($autoplay))
+		{
+			$output .= sprintf('<input type="hidden" id="codrops-autoplay" value="%s" />', $autoplay);
+		}
+
+		if (!empty($speed))
+		{
+			$output .= sprintf('<input type="hidden" id="codrops-speed" value="%s" />', $speed);
 		}
 		
 

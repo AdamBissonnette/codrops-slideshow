@@ -103,6 +103,8 @@
         initEvents() {
             this.DOM.nextCtrl.addEventListener('click', () => this.navigate('next'));
             this.DOM.prevCtrl.addEventListener('click', () => this.navigate('prev'));
+            this.DOM.el.addEventListener('mouseover', () => this.DOM.el.classList.add("busy"));
+            this.DOM.el.addEventListener('mouseout', () => this.DOM.el.classList.remove("busy"));
             
             window.addEventListener('resize', debounce(() => {
                 this.rect = this.DOM.el.getBoundingClientRect();
@@ -118,6 +120,19 @@
                     this.navigate('next');
                 }
             });
+
+            this.autoplay();
+        }
+        autoplay() {
+            var e = this;
+            var speed = document.getElementById("codrops-speed").value;
+            setTimeout(function() {
+                if (!e.DOM.el.classList.contains("busy"))
+                {
+                    e.navigate('next');
+                }
+                e.autoplay();
+            }, speed);
         }
         navigate(dir = 'next') {
             if ( this.isAnimating ) return false;
