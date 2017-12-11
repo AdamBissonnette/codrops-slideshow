@@ -31,8 +31,8 @@ class CodropsSlideshow {
 		add_action( 'init', array($this, 'init_plugin') );
 		add_action( 'admin_init', array($this, 'admin_init_plugin') );
 		//add_action( 'current_screen', array($this, 'current_screen_init_plugin') );
-		add_action('wp_ajax_codrops_slideshow', array($this, 'codrops_slideshow_ajax') );
-		add_action('wp_ajax_nopriv_codrops_slideshow', array($this, 'codrops_slideshow_ajax') );
+		// add_action('wp_ajax_codrops_slideshow', array($this, 'codrops_slideshow_ajax') );
+		// add_action('wp_ajax_nopriv_codrops_slideshow', array($this, 'codrops_slideshow_ajax') );
 		
 		// if (CodropsSlideshow::isready($config))
 		// {
@@ -46,9 +46,9 @@ class CodropsSlideshow {
 		// register_activation_hook( __FILE__, '_flush_rewrites' );
 	}
 
-	public function _flush_rewrites() {
-		flush_rewrite_rules();
-	}
+	// public function _flush_rewrites() {
+	// 	flush_rewrite_rules();
+	// }
 
 	public static function plugin_activation() {}
 	public function plugin_textdomain() {
@@ -140,11 +140,8 @@ class CodropsSlideshow {
 			'1.0',
 			TRUE
 		);
-		wp_enqueue_script( 'imagesloaded' );
-		wp_enqueue_script( 'animejs' );
 
 		wp_register_style( 'base', $css_inc_path . 'base.css' );
-		wp_enqueue_style( 'base' );
 		//Enqueue script
 		// wp_register_script( 'googleplaces',
 		// 	'https://maps.googleapis.com/maps/api/js?key='.self::$class_config["places-key"].'&libraries=places',
@@ -201,6 +198,10 @@ class CodropsSlideshow {
 		//enqueue registered scripts
 		$nav_template = '<nav class="slidenav"><div class="slidenav__item slidenav__item--prev"></div><div class="slidenav__item slidenav__item--next"></div></nav>';
 		$slides_wrapper = sprintf('<div id="slideshow-container" class="%s loading"><div class="slideshow" style="height:%s;">%s%s</div></div>', $view, $height, "%s", $nav_template);
+
+		wp_enqueue_script( 'imagesloaded' );
+		wp_enqueue_script( 'animejs' );
+		wp_enqueue_style( 'base' );
 
 		wp_enqueue_script( $view );
 
@@ -325,7 +326,7 @@ class CodropsSlideshow {
 	}
 }
 
-register_activation_hook( __FILE__, array( 'CodropsSlideshow', 'plugin_activation' ) );
+// register_activation_hook( __FILE__, array( 'CodropsSlideshow', 'plugin_activation' ) );
 // include('admin/admin-init.php');
 
 codrops_slideshow_init();
